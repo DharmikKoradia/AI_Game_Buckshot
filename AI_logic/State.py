@@ -10,7 +10,7 @@ class GameState:
     simpler for the AI to make new states for prediction'''
     def __init__(self):
         self.player = Player('Player',4)
-        self.dealer = Player('AI',4)
+        self.dealer = Player('Dealer',4)
         self.shells = [] # '1' : Live, 0: Blank
         self.shell_index = 0
         self.turn = 'Player' #Initally it is always players turn

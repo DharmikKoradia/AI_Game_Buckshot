@@ -40,7 +40,9 @@ def apply_action(state,action):
                 s.turn = 'Dealer'
             else:
                 s.turn = 'Player'
-        
+        else:
+            if s.turn=='Player':
+                s.turn = 'Dealer'
 
     elif action == 'shoot_player':
         s.shell_index += 1
@@ -50,6 +52,10 @@ def apply_action(state,action):
             if s.turn=='Player':
                 s.turn = 'Dealer'
             else:
+                s.turn = 'Player'
+        
+        else:
+            if s.turn == 'Dealer':
                 s.turn = 'Player'
         
     return s
