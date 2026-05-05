@@ -94,10 +94,36 @@ def execute_shot(state, target):
     return shell, damage_dealt, turn_changed
 
 
-#Ai move selection (baaki hai,samja nhi gpt code baadmein karunga after tera ai engine hojaye ;[ )
+# ─── AI move selection ────────────────────────────
+
+def get_ai_move(state):
+    """
+    Asks the AI (minimax) to pick the best action for the Dealer.
+
+    The Dealer is the MINIMISER in the minimax tree
+    (lower evaluate scores are better for the Dealer).
+
+    We simulate every legal action, run minimax on the resulting
+    child state, and pick whichever action yields the LOWEST score.
+
+    Returns:
+        best_action (str) — e.g. 'shoot_player' or 'shoot_dealer'
+    """
+    best_score = math.inf        # Dealer minimises → start at +inf
+    best_action = None
+    depth = 6                    # How many moves ahead the AI looks
+
+    for action in get_actions(state):
+        child_state = apply_action(state, action)
+        score, _ = minimax(child_state, depth - 1)   # unpack (score, moves)
+        if score < best_score:
+            best_score = score
+            best_action = action
+
+    return best_action
 
 
-#game state chek 
+# ─── Game state checks ────────────────────────────
 
 def check_round_over(state):
     """Returns True if all shells in the current round have been fired."""
