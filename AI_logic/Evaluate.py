@@ -17,6 +17,47 @@ def evaluate(state):
         return state.player.hp * 10 - state.dealer.hp * 10
 
 
+def get_shell_probs(state):
+    """Returns (p_live, p_blank) from the remaining unfired shells."""
+    remaining = state.shells[state.shell_index:]
+    total = len(remaining)
+    if total == 0:
+        return 0.0, 0.0
+    return remaining.count('Live') / total, remaining.count('Blank') / total
+
+
+def expected_value(state, action, depth, alpha, beta):
+    """
+    For a player who doesn't know the current shell, compute the
+    expected minimax value of `action` by branching on both possible
+    shell outcomes weighted by their probability.
+    """
+    remaining = state.shells[state.shell_index:]
+    total = len(remaining)
+    if total == 0:
+        return evaluate(state)
+
+    p_live  = remaining.count('Live')  / total
+    p_blank = remaining.count('Blank') / total
+    ev = 0.0
+
+    if p_live > 0:
+        live_state = state.copy()
+        live_state.shells[live_state.shell_index] = 'Live'
+        child = apply_action(live_state, action)
+        val, _ = minimax(child, depth - 1, alpha, beta)
+        ev += p_live * val
+
+    if p_blank > 0:
+        blank_state = state.copy()
+        blank_state.shells[blank_state.shell_index] = 'Blank'
+        child = apply_action(blank_state, action)
+        val, _ = minimax(child, depth - 1, alpha, beta)
+        ev += p_blank * val
+
+    return ev
+
+
 def minimax(state, depth, alpha=-math.inf, beta=math.inf):
     """
     Minimax with Alpha-Beta pruning.
@@ -55,19 +96,18 @@ def minimax(state, depth, alpha=-math.inf, beta=math.inf):
 
         return best, [best_move] + best_sequence
 
-    else:                               # Minimising player (Dealer)
+    else:
+        # Dealer doesn't know the shell — picks based on expected value
         best = math.inf
         for action in get_actions(state):
-            child = apply_action(state, action)
-            value, sequence = minimax(child, depth - 1, alpha, beta)
+            value = expected_value(state, action, depth, alpha, beta)
 
             if value < best:
                 best = value
                 best_move = action
-                best_sequence = sequence
 
             beta = min(beta, best)
             if best <= alpha:           # Alpha cut-off
                 break
 
-        return best, [best_move] + best_sequence
+        return best, [best_move]
