@@ -9,23 +9,35 @@ def evaluate(state):
     else:
         return state.dealer.hp*10 - state.player.hp*10
     
-def minimax(state,depth,AI_turn):
+def minimax(state, depth):
     if is_terminal(state) or depth == 0:
-        return evaluate(state)
+        return evaluate(state), []  # empty move list at leaf
     
-    if AI_turn:
+    best_move = None
+    best_sequence = []
+
+    if state.turn == 'Player':
         best = -math.inf
         for action in get_actions(state):
-            child = apply_action(state,action)
-            score = minimax(child,depth-1,False)
-            best = max(best,score)
-        return best
-    
+            child = apply_action(state, action)
+            value, sequence = minimax(child, depth - 1)
+
+            if value > best:
+                best = value
+                best_move = action
+                best_sequence = sequence  # best child's sequence
+
+        return best, [best_move] + best_sequence  # prepend current best move
+
     else:
         best = math.inf
         for action in get_actions(state):
-            child = apply_action(state,action)
-            score = minimax(child,depth-1,True)
-            best = min(score,best)
-        return best
-        
+            child = apply_action(state, action)
+            value, sequence = minimax(child, depth - 1)
+
+            if value < best:
+                best = value
+                best_move = action
+                best_sequence = sequence
+
+        return best, [best_move] + best_sequence

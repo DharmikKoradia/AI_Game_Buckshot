@@ -1,16 +1,16 @@
 def get_actions(state):
     actions = ['shoot_player','shoot_dealer']
 
-    if state.turn == 'Player':
-        items = state.player.items
-    else:
-        items = state.dealer.items
+    # if state.turn == 'Player':
+    #     items = state.player.items
+    # else:
+    #     items = state.dealer.items
 
-    if 'saw' in items:
-        actions.append('use_saw')
+    # if 'saw' in items:
+    #     actions.append('use_saw')
     
-    if 'magnifier' in items:
-        actions.append('use_magifier')
+    # if 'magnifier' in items:
+    #     actions.append('use_magifier')
 
     return actions
 
