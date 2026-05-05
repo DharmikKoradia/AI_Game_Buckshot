@@ -107,18 +107,13 @@ def get_ai_move(state):
     Returns:
         best_action (str) — e.g. 'shoot_player' or 'shoot_dealer'
     """
-    # ── Build a "fair" copy: shuffle remaining shells ──
-    fair_state = state.copy()
-    remaining = fair_state.shells[fair_state.shell_index:]
-    random.shuffle(remaining)
-    fair_state.shells = fair_state.shells[:fair_state.shell_index] + remaining
 
     best_score = math.inf        # Dealer minimises → start at +inf
     best_action = None
     depth = 3            # How many moves ahead the AI looks
 
-    for action in get_actions(fair_state):
-        child_state = apply_action(fair_state, action)
+    for action in get_actions(state):
+        child_state = apply_action(state, action)
         score, _ = minimax(child_state, depth - 1)   # unpack (score, moves)
         if score < best_score:
             best_score = score

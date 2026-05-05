@@ -9,11 +9,10 @@ def evaluate(state):
     Negative  → good for Dealer.
     """
     if state.player.hp <= 0:
-        return -1000          # Player is dead → worst outcome
+        return -1000
     elif state.dealer.hp <= 0:
-        return 1000           # Dealer is dead → best outcome
+        return 1000
     else:
-        # More dealer HP remaining is bad; more player HP is good.
         return state.player.hp * 10 - state.dealer.hp * 10
 
 
@@ -26,14 +25,19 @@ def get_shell_probs(state):
     return remaining.count('Live') / total, remaining.count('Blank') / total
 
 
-def expected_value(state, action, depth, alpha, beta):
+def expected_value_for_action(state, action, depth, alpha, beta):
     """
-    For a player who doesn't know the current shell, compute the
-    expected minimax value of `action` by branching on both possible
-    shell outcomes weighted by their probability.
+    Neither player knows the current shell — compute the expected minimax
+    value of `action` by branching on BOTH possible shell outcomes,
+    weighted by their probability.
+
+    This is used for BOTH the Player and the Dealer, making the search
+    fair: neither side gets to cheat by peeking at shell_index.
     """
     remaining = state.shells[state.shell_index:]
     total = len(remaining)
+
+    # Edge case: no shells left, just evaluate
     if total == 0:
         return evaluate(state)
 
@@ -41,6 +45,7 @@ def expected_value(state, action, depth, alpha, beta):
     p_blank = remaining.count('Blank') / total
     ev = 0.0
 
+    # Branch: what if the next shell is Live?
     if p_live > 0:
         live_state = state.copy()
         live_state.shells[live_state.shell_index] = 'Live'
@@ -48,6 +53,7 @@ def expected_value(state, action, depth, alpha, beta):
         val, _ = minimax(child, depth - 1, alpha, beta)
         ev += p_live * val
 
+    # Branch: what if the next shell is Blank?
     if p_blank > 0:
         blank_state = state.copy()
         blank_state.shells[blank_state.shell_index] = 'Blank'
@@ -60,16 +66,14 @@ def expected_value(state, action, depth, alpha, beta):
 
 def minimax(state, depth, alpha=-math.inf, beta=math.inf):
     """
-    Minimax with Alpha-Beta pruning.
+    Minimax with Alpha-Beta pruning — FAIR version.
 
-    alpha : best score the maximiser (Player) is already guaranteed
-    beta  : best score the minimiser (Dealer) is already guaranteed
+    NEITHER the Player nor the Dealer knows the next shell's type.
+    Both sides choose actions based on expected value over the
+    probability distribution of remaining shells.
 
-    Pruning:
-      - Maximiser prunes when value >= beta  (the minimiser above would never
-        allow this branch because it already has something better).
-      - Minimiser prunes when value <= alpha (the maximiser above would never
-        allow this branch because it already has something better).
+    This prevents the AI from cheating while still playing optimally
+    given the information both sides actually have.
 
     Returns (score, move_sequence).
     """
@@ -79,16 +83,16 @@ def minimax(state, depth, alpha=-math.inf, beta=math.inf):
     best_move = None
     best_sequence = []
 
-    if state.turn == 'Player':          # Maximising player
+    if state.turn == 'Player':          # Maximising — Player wants highest score
         best = -math.inf
         for action in get_actions(state):
-            child = apply_action(state, action)
-            value, sequence = minimax(child, depth - 1, alpha, beta)
+            # Use expected value: Player doesn't know the next shell
+            value = expected_value_for_action(state, action, depth, alpha, beta)
 
             if value > best:
                 best = value
                 best_move = action
-                best_sequence = sequence
+                best_sequence = []      # Expected-value branches have no single sequence
 
             alpha = max(alpha, best)
             if best >= beta:            # Beta cut-off
@@ -96,11 +100,11 @@ def minimax(state, depth, alpha=-math.inf, beta=math.inf):
 
         return best, [best_move] + best_sequence
 
-    else:
-        # Dealer doesn't know the shell — picks based on expected value
+    else:                               # Minimising — Dealer wants lowest score
         best = math.inf
         for action in get_actions(state):
-            value = expected_value(state, action, depth, alpha, beta)
+            # Use expected value: Dealer doesn't know the next shell either
+            value = expected_value_for_action(state, action, depth, alpha, beta)
 
             if value < best:
                 best = value
