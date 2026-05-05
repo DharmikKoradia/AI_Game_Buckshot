@@ -28,7 +28,9 @@ def load_shells(state):
         (live_count, blank_count) — so the UI can announce them
     """
     total = random.randint(2, 8)
-    live_count = random.randint(1, total - 1)   # guarantees at least 1 blank
+    min_live = max(1,math.ceil(total*0.3))
+    max_live = max(total-1,math.floor(total*0.7))
+    live_count = random.randint(min_live, max_live)   # guarantees at least 1 blank
     blank_count = total - live_count
 
     shells = ['Live'] * live_count + ['Blank'] * blank_count
