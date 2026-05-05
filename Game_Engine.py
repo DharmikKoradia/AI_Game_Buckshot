@@ -111,7 +111,7 @@ def get_ai_move(state):
     """
     best_score = math.inf        # Dealer minimises → start at +inf
     best_action = None
-    depth = 6                    # How many moves ahead the AI looks
+    depth = 3            # How many moves ahead the AI looks
 
     for action in get_actions(state):
         child_state = apply_action(state, action)
