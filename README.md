@@ -51,10 +51,8 @@ The repository contains the game engine and AI logic in separate Python files, k
 
 3. Run the project's main Python entry point.
 
-   Replace the command below with the actual entry-point filename:
-
    ```bash
-   python <entry_point>.py
+   python game_loop.py
    ```
 
 ## What I Learned
@@ -73,6 +71,7 @@ The repository contains the game engine and AI logic in separate Python files, k
 
 ## Author
 
-**Dharmik Koradia**
-
+**Dharmik Koradia** **Deev Mehta**
+https://github.com/deev06
 [GitHub Profile](https://github.com/DharmikKoradia)
+[GitHub Profile](https://github.com/deev06))
